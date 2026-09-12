@@ -20,19 +20,23 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+
       - name: Extract Android project
         run: |
           mkdir -p project
           unzip -o WorldSoccerManager-Android-Project.zip -d project
 
       - name: Build APK
-        working-directory: project
+        working-directory: project/WorldSoccerManagerAndroid
         run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          gradle assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: WorldSoccerManager-APK
-          path: project/**/build/outputs/apk/debug/*.apk
+          path: project/WorldSoccerManagerAndroid/app/build/outputs/apk/debug/app-debug.apk
