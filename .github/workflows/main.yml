@@ -28,8 +28,7 @@ jobs:
       - name: Extract Android project
         run: |
           mkdir -p project
-          unzip -o WorldSoccerManager-Android-Project.zip -d project
-
+          unzip -o WorldSoccerManager-Android-Project-FIXED.zip -d project
       - name: Build APK
         working-directory: project/WorldSoccerManagerAndroid
         run: |
