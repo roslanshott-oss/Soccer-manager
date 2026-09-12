@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>World Soccer Manager</title><style>body{font-family:system-ui;margin:0;background:#10151c;color:#fff}main{max-width:760px;margin:auto;padding:24px}input,button{font-size:16px;padding:11px;border-radius:8px;border:1px solid #39424e;margin:4px;background:#18212b;color:#fff}button{cursor:pointer;background:#1f7a4d}.card{background:#18212b;border:1px solid #2c3744;border-radius:12px;padding:16px;margin:12px 0}#chat{height:220px;overflow:auto;background:#0b1015;padding:10px;border-radius:8px}.muted{color:#9aa7b5}</style></head>
+<body><main><h1>⚽ World Soccer Manager</h1><p class="muted">Multiplayer server is online.</p>
+<div class="card"><h2>Player</h2><input id="name" placeholder="Your manager name"><button onclick="join()">Join</button><p id="me"></p></div>
+<div class="card"><h2>League</h2><input id="league" placeholder="League name"><button onclick="createLeague()">Create</button><br><input id="leagueId" placeholder="League ID"><button onclick="joinLeague()">Join league</button><p id="leagueState"></p></div>
+<div class="card"><h2>Online managers</h2><div id="players" class="muted">None yet</div></div>
+<div class="card"><h2>Chat</h2><div id="chat"></div><input id="msg" placeholder="Message" onkeydown="if(event.key==='Enter')sendChat()"><button onclick="sendChat()">Send</button></div>
+<script src="/socket.io/socket.io.js"></script><script>
+const s=io();let joined=false;
+function join(){const name=document.getElementById('name').value;s.emit('player:join',{name});}
+function createLeague(){s.emit('league:create',{name:document.getElementById('league').value});}
+function joinLeague(){s.emit('league:join',{id:document.getElementById('leagueId').value});}
+function sendChat(){const el=document.getElementById('msg');s.emit('chat:send',{message:el.value});el.value='';}
+s.on('player:joined',p=>{joined=true;document.getElementById('me').textContent=`Logged in as ${p.name} — budget $${p.budget.toLocaleString()}`});
+s.on('lobby:players',ps=>{document.getElementById('players').innerHTML=ps.map(p=>`<div>⚽ ${escapeHtml(p.name)} — ${escapeHtml(p.team)}</div>`).join('')||'None yet'});
+s.on('league:update',l=>{document.getElementById('leagueState').textContent=`${l.name} | ID: ${l.id} | Managers: ${l.members.length}`;document.getElementById('leagueId').value=l.id});
+s.on('chat:message',m=>{const c=document.getElementById('chat');c.insertAdjacentHTML('beforeend',`<div><b>${escapeHtml(m.name)}:</b> ${escapeHtml(m.message)}</div>`);c.scrollTop=c.scrollHeight});
+s.on('error:message',m=>alert(m));
+function escapeHtml(x){return x.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+</script></main></body></html>
